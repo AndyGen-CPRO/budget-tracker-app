@@ -6,6 +6,10 @@ function App() {
   const [expense, setExpense] = useState(0);
   const [expenseList, setExpenseList] = useState([]);
   const [currentBudget, setCurrentBudget] = useState(0);
+  const [isVariable, setIsVariable] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurreceFreq, setRecurreceFreq] = useState("");
+  const [totalExpense, setTotalExpense] = useState(0);
   const [message, setMessage] = useState("");
 
   const handleIncome = () => {
@@ -31,23 +35,45 @@ function App() {
       return
     }
     
-    if (expense < 1) {
+    if (expense < 0.01) {
       setMessage("Expense value has to be greater than 0.");
       return
     }
+    
+    let newExpense = parseFloat(expense).toFixed(2);
+    let expenseType = "variable";
 
-    const newExpense = parseFloat(expense).toFixed(2);
-    const newBudget = parseFloat(currentBudget - newExpense).toFixed(2);
-    setExpenseList([...expenseList, newExpense]);
-    setCurrentBudget(newBudget);
+    if (isRecurring) {
+      if (!recurreceFreq) {
+        setMessage("Please select the recurrence frequency.")
+        return;
+      }
+
+      expenseType = "recurring"
+
+      const freqType = {
+        weekly: 4, biweekly: 2, monthly: 1
+      };
+
+      newExpense = (newExpense *  freqType[recurreceFreq]).toFixed(2)
+    }
+
+    const newBudget = parseFloat(currentBudget) - parseFloat(newExpense);
+    const newTotalExpense = parseFloat(totalExpense) + parseFloat(newExpense);
+    setExpenseList([...expenseList, { value: newExpense, type: expenseType, frequency: recurreceFreq }]);
+    setCurrentBudget(newBudget.toFixed(2));
+    setTotalExpense(newTotalExpense.toFixed(2));
     setExpense(0);
+    setRecurreceFreq("");
+    setIsVariable(false);
+    setIsRecurring(false);
     setMessage("");
   }
 
   return (
     <div className="App">
       <h1>Welcome to the Budget Tracker App</h1>
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
       {!currentBudget ? (
         <>
           <div>
@@ -64,23 +90,54 @@ function App() {
         <>
           <div>
             <h2>Initial Monthly Cash In: CA${income}</h2>
-            <div>
-              <label>Insert Expense:</label>
-              <input
-                type="number"
-                value={expense}
-                onChange={(e) => setExpense(e.target.value)}
-              />
-              <button onClick={handleExpense}>Insert</button>
-            </div>
-            {expenseList && (
+            <button onClick={() => {setIsVariable(true); setIsRecurring(false)}}>Insert Variable Expense</button>
+            <button onClick={() => {setIsRecurring(true); setIsVariable(false)}}>Insert Recurring Expense</button>
+            {isVariable && (
+              <div>
+                <label>Insert Expense: CA$</label>
+                <input
+                  type="number"
+                  value={expense}
+                  onChange={(e) => setExpense(e.target.value)}
+                />
+                <button onClick={handleExpense}>Insert</button>
+              </div>
+            )}
+            {isRecurring && (
+                <div>
+                  <div>
+                    <label>Insert Expense: CA$</label>
+                    <input
+                      type="number"
+                      value={expense}
+                      onChange={(e) => setExpense(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label>Select Recurrence Frequency:</label>
+                    <select value={recurreceFreq} onChange={(e) => setRecurreceFreq(e.target.value)}>
+                      <option value="" disabled>...</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="biweekly">Biweekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                <button onClick={handleExpense}>Insert</button>
+                </div>
+            )}
+            {currentBudget < income && (
               <>
                 <ol>
+                  <strong>Expense List: <i>recurring expenses are calculated for the month</i></strong>
                   {expenseList.map((data, index) => ( 
-                      <li key={index}>CA${data}</li> 
+                      <li key={index}>
+                        CA${data.value} - {data.type}
+                        {data.frequency && (<span> - {data.frequency}</span>)}
+                        </li> 
                   ))}
                 </ol>
-                <h3>Current Budget: {currentBudget}</h3>
+                <h3>Total Expense: CA${totalExpense}</h3>
+                <h3>Current Budget: CA${currentBudget}</h3>
                 {currentBudget < 1 && (
                   <>
                     <h4>Your monthly net balance is now on negative.</h4>
