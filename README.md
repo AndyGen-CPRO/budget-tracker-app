@@ -1,4 +1,4 @@
-# Budget Tracker App Getting Started with Create React App
+# Budget Tracker App
 Client: Robert Louiz Victoriano<br />
 Developer: Christian Andy Generoso
 
