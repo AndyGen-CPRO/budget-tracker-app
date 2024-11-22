@@ -11,3 +11,4 @@ ReactJS
 - Insert recurring expenses (weekly, biweekly, monthly)
 - Display total expenses
 - Display total budget left
+- Delete expenses
