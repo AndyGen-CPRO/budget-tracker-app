@@ -70,6 +70,17 @@ function App() {
     setMessage("");
   }
 
+  const handleDelete = (index) => {
+    const deletedExpense = expenseList[index];
+    setExpenseList(expenseList.filter((_,expense) => expense !== index));
+
+    const newBudget = parseFloat(currentBudget) + parseFloat(deletedExpense.value);
+    const newTotalExpense = parseFloat(totalExpense) - parseFloat(deletedExpense.value);
+
+    setCurrentBudget(newBudget.toFixed(2));
+    setTotalExpense(newTotalExpense.toFixed(2));
+  }
+
   return (
     <div className="App">
       <h1>Welcome to the Budget Tracker App</h1>
@@ -133,9 +144,12 @@ function App() {
                       <li key={index}>
                         CA${data.value} - {data.type}
                         {data.frequency && (<span> - {data.frequency}</span>)}
-                        </li> 
+                        <button onClick={() => handleDelete(index)}>Delete</button>
+                      </li> 
                   ))}
                 </ol>
+                </>
+            )}
                 <h3>Total Expense: CA${totalExpense}</h3>
                 <h3>Current Budget: CA${currentBudget}</h3>
                 {currentBudget < 1 && (
@@ -143,8 +157,6 @@ function App() {
                     <h4>Your monthly net balance is now on negative.</h4>
                   </>
                 )}
-              </>
-            )}
           </div>
         </>
       )}
